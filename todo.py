@@ -1,7 +1,7 @@
 import sublime, sublime_plugin
 
 class ShowTodoCommand(sublime_plugin.TextCommand):
-  def run(self, edit):
+	def run(self, edit):
 		todo_selector = 'TODO:'
 		self.todos = []
 		ts = []
