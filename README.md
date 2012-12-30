@@ -1,4 +1,5 @@
-sublime-text2
-=============
+Sublime Text 2 Todo Plugin [Beta]
+=================================
 
-Stuff for SublimeText2 Editor
+Adds new command to command palete that searches for comments with "TODO:" str inside and navigate throught them
+In development. 
