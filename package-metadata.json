@@ -1,20 +1,8 @@
 {
-	"schema_version": "1.1",
-	"packages": [
-		{
-			"name": "SublimeTodo",
-			"description": "Sublime Todo manager",
-			"author": "SDemonUA",
-			"homepage": "https://github.com/SDemonUA/sublime-text2",
-			"last_modified": "2012-12-30 15:48:27",
-			"platforms": {
-				"*": [
-					{
-						"version": "1.1",
-						"url": "https://github.com/SDemonUA/sublime-text2/archive/master.zip"
-					}
-				]
-			}
-		}
-	]
+	"name": "SublimeTodo",
+	"description": "Sublime Todo manager",
+	"author": "SDemonUA",
+	"homepage": "https://github.com/SDemonUA/sublime-text2",
+	"version": "1.1",
+	"url": "https://github.com/SDemonUA/sublime-text2/archive/master.zip"
 }

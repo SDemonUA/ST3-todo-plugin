@@ -1,6 +1,6 @@
 [
   {
-		"caption" : "Show TODOs",
+		"caption" : "Todo: Show todo in this file",
 		"command" : "show_todo"
 	}
 ]

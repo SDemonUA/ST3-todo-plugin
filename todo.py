@@ -24,6 +24,14 @@ def get_comment_prefixes(view, pt):
 
     return prefixes
 
+def isPanel(view):
+    if view.window() is None:
+        return True
+    (group, index) = view.window().get_view_index(view)
+    if group is -1 and index is -1:
+        return True
+    return False
+
 class ShowTodoCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         s = sublime.load_settings('Todo.sublime-settings')
@@ -33,7 +41,7 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
         ts = []
 
         for regex in s.get('todo_string_prefix', ["^TODO"]):
-            todo_selectors.append(re.compile(regex, re.I))
+            todo_selectors.append(re.compile(regex))
 
         # Split comments into lines
         v = self.view
@@ -49,6 +57,8 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
                     s = s[len(pref):len(s)].lstrip()
                     for regex in todo_selectors:
                         if regex.match(s):
+                            if len (s) > 65 :
+                                s = s[:62]+'...'
                             ts.append(s)
                             self.todos.append(r)
                             break
@@ -56,6 +66,7 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
 
         # Show panel with TODOs
         if len(ts) > 0:
+            # TODO: Save some sings of quick panel presense
             v.window().show_quick_panel(ts, self.on_done, sublime.MONOSPACE_FONT)
             # v = self.window.get_output_panel('todo_list')
 
@@ -80,3 +91,9 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
 
     def description(args):
         return "List TODOs in openned file."
+
+# TODO: detect focus changes in quick_panel
+class onTodoItemFocusEventListener(sublime_plugin.EventListener):
+    def on_activated(self, view):
+        if isPanel(view):
+            print "Inside panel"
