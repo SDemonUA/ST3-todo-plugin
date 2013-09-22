@@ -14,7 +14,7 @@ def get_comment_prefixes(view, pt):
     prefixes = []
 
     # transform the dict into a single array of valid comments
-    suffixes = [""] + ["_" + str(i) for i in xrange(1, 10)]
+    suffixes = [""] + ["_" + str(i) for i in range(1, 10)]
     for suffix in suffixes:
         start = all_vars.setdefault("TM_COMMENT_START" + suffix)
 
@@ -23,14 +23,6 @@ def get_comment_prefixes(view, pt):
             prefixes.append(start.strip())
 
     return prefixes
-
-def isPanel(view):
-    if view.window() is None:
-        return True
-    (group, index) = view.window().get_view_index(view)
-    if group is -1 and index is -1:
-        return True
-    return False
 
 class ShowTodoCommand(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -67,7 +59,8 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
         # Show panel with TODOs
         if len(ts) > 0:
             # TODO: Save some sings of quick panel presense
-            v.window().show_quick_panel(ts, self.on_done, sublime.MONOSPACE_FONT)
+            self.old_vis_vector=v.viewport_position()
+            v.window().show_quick_panel(ts, self.on_done, sublime.MONOSPACE_FONT, 0, self.on_hl_panel_item)
             # v = self.window.get_output_panel('todo_list')
 
             # edit = v.begin_edit()
@@ -84,6 +77,14 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
             self.view.sel().clear()
             self.view.sel().add(self.todos[idx])
             self.view.show(self.todos[idx])
+        else:
+            self.view.set_viewport_position(self.old_vis_vector)
+
+        return
+
+    def on_hl_panel_item(self, idx):
+        if idx is not -1:
+            self.view.show(self.todos[idx])
         return
 
     def is_visible(args):
@@ -93,7 +94,3 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
         return "List TODOs in openned file."
 
 # TODO: detect focus changes in quick_panel
-class onTodoItemFocusEventListener(sublime_plugin.EventListener):
-    def on_activated(self, view):
-        if isPanel(view):
-            print "Inside panel"
