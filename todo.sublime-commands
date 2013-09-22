@@ -2,5 +2,9 @@
 	{
 		"caption" : "Todo: Show todo in this file",
 		"command" : "show_todo"
+	},
+	{
+		"caption" : "Todo: List todo in this file",
+		"command" : "list_todo"
 	}
 ]
