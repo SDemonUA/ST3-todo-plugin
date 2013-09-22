@@ -92,10 +92,10 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
         self.todos = get_todo_regions(view, get_todo_selectors())   
 
         # Show panel with TODOs
-        if len(self.todos[0]) > 0:
+        if len(self.todos) > 0:
             todo_titles = []
             for td in self.todos:
-                if "titile" in td:
+                if "title" in td:
                     todo_titles.append(td["title"])
                 else:
                     todo_titles.append("<empty>")
