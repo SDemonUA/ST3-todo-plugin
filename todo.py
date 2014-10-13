@@ -36,8 +36,9 @@ def get_todo_regions(view, selectors):
         comment_prefixes = get_comment_prefixes(view, r.begin())
         s = view.substr(r).strip()
         for pref in comment_prefixes:
-            if s.find(pref, 0) is not -1:
-                s = s[len(pref):len(s)].lstrip()
+            cpos = s.find(pref, 0)
+            if cpos is not -1:
+                s = s[cpos+len(pref):len(s)].lstrip()
                 for regex in selectors:
                     if regex.match(s):
                         if len (s) > 65 :
@@ -59,7 +60,7 @@ class ListTodoCommand(sublime_plugin.TextCommand):
     def run(self, edit, view_id=False):
         if not view_id:
             window = self.view.window()
-            v = window.create_output_panel('todo_list')    
+            v = window.create_output_panel('todo_list')
             window.run_command("show_panel", {"panel" : "output.todo_list"})
             v.run_command("list_todo", {"view_id" : self.view.id()})
         else:
@@ -67,13 +68,13 @@ class ListTodoCommand(sublime_plugin.TextCommand):
             for v in self.view.window().views():
                 if v.id() is view_id:
                     view = v;
-            
+
             if not view:
                 return
 
             todos = get_todo_regions(view, get_todo_selectors())
             self.view.insert(edit, 0, u"\n".join(line["title"] + " [ line " + str(view.rowcol(line["region"].begin())[0]+1) + " ]" for line in todos))
-            
+
         return
 
 
@@ -89,7 +90,7 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         s = sublime.load_settings('Todo.sublime-settings')
         view = self.view
-        self.todos = get_todo_regions(view, get_todo_selectors())   
+        self.todos = get_todo_regions(view, get_todo_selectors())
 
         # Show panel with TODOs
         if len(self.todos) > 0:
@@ -123,8 +124,7 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
         return
 
     def is_visible(args):
-        # TODO detect if we are in search result view
-        return True
+        return True # TODO detect if we are in search result view
 
     def description(args):
         return "List TODOs in this file."
