@@ -24,9 +24,16 @@ def get_comment_prefixes(view, pt):
 
     return prefixes
 
-def get_todo_regions(view, selectors):
+def get_todo_regions(view):
     lines = []
     todos = []
+    selectors = []
+
+    # Get selectors from user settings
+    stng = sublime.load_settings('Todo.sublime-settings')
+    for regex in stng.get('todo_string_prefix', ["^TODO"]):
+        selectors.append(re.compile(regex))
+
     # Split comments into lines
     for r in view.find_by_selector('comment'):
         lines += view.lines(r)
@@ -48,13 +55,9 @@ def get_todo_regions(view, selectors):
                 break
     return todos
 
-def get_todo_selectors():
-    todo_selectors = []
-    s = sublime.load_settings('Todo.sublime-settings')
-    for regex in s.get('todo_string_prefix', ["^TODO"]):
-        todo_selectors.append(re.compile(regex))
-
-    return todo_selectors
+def no_todos_found():
+    sublime.status_message("No TODOs in this file.")
+    return
 
 class ListTodoCommand(sublime_plugin.TextCommand):
     def run(self, edit, view_id=False):
@@ -72,8 +75,11 @@ class ListTodoCommand(sublime_plugin.TextCommand):
             if not view:
                 return
 
-            todos = get_todo_regions(view, get_todo_selectors())
-            self.view.insert(edit, 0, u"\n".join(line["title"] + " [ line " + str(view.rowcol(line["region"].begin())[0]+1) + " ]" for line in todos))
+            todos = get_todo_regions(view)
+            if len(todos) is 0:
+                no_todos_found()
+            else:
+                self.view.insert(edit, 0, u"\n".join(line["title"] + " [ line " + str(view.rowcol(line["region"].begin())[0]+1) + " ]" for line in todos))
 
         return
 
@@ -88,9 +94,8 @@ class ListTodoCommand(sublime_plugin.TextCommand):
 
 class ShowTodoCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        s = sublime.load_settings('Todo.sublime-settings')
         view = self.view
-        self.todos = get_todo_regions(view, get_todo_selectors())
+        self.todos = get_todo_regions(view)
 
         # Show panel with TODOs
         if len(self.todos) > 0:
@@ -105,7 +110,7 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
             self.old_vis_vector = view.viewport_position()
             view.window().show_quick_panel(todo_titles, self.on_done, sublime.MONOSPACE_FONT, 0, self.on_hl_panel_item)
         else:
-            sublime.status_message("No TODOs in this file.")
+            no_todos_found()
         return
 
     def on_done(self, idx):
@@ -128,5 +133,30 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
 
     def description(args):
         return "List TODOs in this file."
+
+
+# TODO erase self.todos on any input ?
+class CarouselTodoCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        view = self.view;
+        self.todos = get_todo_regions(view)
+
+        if len(self.todos) is 0:
+            no_todos_found()
+            return
+
+        if not hasattr(self, "last_idx"):
+            self.last_idx=-1
+
+        self.last_idx = (self.last_idx+1) % len(self.todos)
+        view.show_at_center(self.todos[self.last_idx]["region"])
+        view.sel().clear()
+        view.sel().add(self.todos[self.last_idx]["region"])
+
+        return
+    def is_visible(args):
+        return True
+    def description(args):
+        return "Cycle trought TODOs in this file."
 
 # TODO: detect focus changes in quick_panel

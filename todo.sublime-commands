@@ -6,5 +6,9 @@
 	{
 		"caption" : "Todo: List todo in this file",
 		"command" : "list_todo"
+	},
+	{
+		"caption" : "Todo: Cycle todo in this file",
+		"command" : "carousel_todo"
 	}
 ]
