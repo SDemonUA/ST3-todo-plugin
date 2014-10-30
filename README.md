@@ -7,5 +7,9 @@ In development.
 
 Release notes:
 
+1.4
+- Added reverse couresel parameter
+- Added selection for "focused" todo when using ShowTodoCommand
+
 1.3
 - Added basic carousel implementation

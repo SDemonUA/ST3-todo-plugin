@@ -108,6 +108,7 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
 
             # TODO: Save some sings of quick panel presense
             self.old_vis_vector = view.viewport_position()
+            self.prev_hl_idx = -1
             view.window().show_quick_panel(todo_titles, self.on_done, sublime.MONOSPACE_FONT, 0, self.on_hl_panel_item)
         else:
             no_todos_found()
@@ -119,13 +120,21 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
             self.view.sel().add(self.todos[idx]["region"])
             self.view.show_at_center(self.todos[idx]["region"])
         else:
+            for todo in self.todos:
+                self.view.sel().subtract(todo["region"])
             self.view.set_viewport_position(self.old_vis_vector)
 
         return
 
     def on_hl_panel_item(self, idx):
+        if self.prev_hl_idx is not -1:
+            self.view.sel().subtract(self.todos[self.prev_hl_idx]["region"])
+
         if idx is not -1:
-            self.view.show_at_center(self.todos[idx]["region"])
+            region = self.todos[idx]["region"]
+            self.view.sel().add(region)
+            self.view.show_at_center(region)
+            self.prev_hl_idx = idx
         return
 
     def is_visible(args):
@@ -137,7 +146,7 @@ class ShowTodoCommand(sublime_plugin.TextCommand):
 
 # TODO erase self.todos on any input ?
 class CarouselTodoCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit, reverse=False):
         view = self.view;
         self.todos = get_todo_regions(view)
 
@@ -145,10 +154,15 @@ class CarouselTodoCommand(sublime_plugin.TextCommand):
             no_todos_found()
             return
 
-        if not hasattr(self, "last_idx"):
-            self.last_idx=-1
+        if not reverse:
+            if not hasattr(self, "last_idx"):
+                self.last_idx = -1
+            self.last_idx = (self.last_idx+1) % len(self.todos)
+        else:
+            if not hasattr(self, "last_idx"):
+                self.last_idx = len(self.todos)
+            self.last_idx = (self.last_idx-1) % len(self.todos)
 
-        self.last_idx = (self.last_idx+1) % len(self.todos)
         view.show_at_center(self.todos[self.last_idx]["region"])
         view.sel().clear()
         view.sel().add(self.todos[self.last_idx]["region"])
