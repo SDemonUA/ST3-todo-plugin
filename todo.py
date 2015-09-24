@@ -178,20 +178,44 @@ class CarouselTodoCommand(sublime_plugin.TextCommand):
 class AddTodoCommand(sublime_plugin.TextCommand):
     """Add new TODO in relative to cursor position AddTodoCommand"""
     def run(self, edit):
-        # Detect what caracters used for comments in this "scope"
         view = self.view
-        get_comment_prefixes(view, view.sel())
 
-        # Detect position of new TODO (end of line, new line, multiple line endings)
+        # Detect what caracters used for comments in this "scope"
+        region_prefix_set = []
+        for region in view.sel():
+            prefixes = get_comment_prefixes(view, region.end())
+            if len (prefixes) is not 0:
+                region_prefix_set.append([region, prefixes])
 
         # Compose TODO content - some sort of snippet or even use snippet to do this
+        snippet = "TODO: text? [by ME]" # TODO change this
 
-        # Add TODO and set focus to its start
+        sel = view.sel()
+        sel.clear()
+        for region_prefix in region_prefix_set:
+            if view.classify(region_prefix[0].end()) & (CLASS_LINE_END | CLASS_EMPTY_LINE):
+                sel.add(region_prefix[0].end())
+                view.insert(edit, region_prefix[0].end(), region_prefix[1][0] + " " + snippet)
+            else:
+                sel.add(view.line(region_prefix[0].end()).end())
+                view.insert(edit, view.line(region_prefix[0].end()).end(), " " + region_prefix[1][0] + " " + snippet)
+
         return
     def is_visible(self):
+        # Detect if view is writable
         if self.view.is_read_only():
             return False
-        # Detect what caracters used for comments in this "scope"
+
+        # Detect if regions has known comment prefixes
+        regions = len (self.view.sel())
+        unavail = 0
+        for region in self.view.sel():
+            if len (get_comment_prefixes(self.view, region.begin())) is 0:
+                unavail = unavail + 1
+
+        if unavail is regions:
+            return False
+
         return True
     def description(args):
         return "Add new TODO"

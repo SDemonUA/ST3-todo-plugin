@@ -15,5 +15,9 @@
 		"caption" : "Todo: Cycle todo in this file [reverse]",
 		"command" : "carousel_todo",
         "args" : { "reverse" : true }
+	},
+	{
+		"caption" : "Todo: add TODO",
+		"command" : "add_todo"
 	}
 ]
