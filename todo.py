@@ -1,7 +1,7 @@
 import sublime, sublime_plugin, re
 
 def get_comment_prefixes(view, pt):
-    shell_vars = view.meta_info("shellVariables", pt)
+    shell_vars = view.meta_info("shellVariables", pt) # view.meta_info(key, point)
     if not shell_vars:
         return []
 
@@ -174,3 +174,24 @@ class CarouselTodoCommand(sublime_plugin.TextCommand):
         return "Cycle trought TODOs in this file."
 
 # TODO: detect focus changes in quick_panel
+
+class AddTodoCommand(sublime_plugin.TextCommand):
+    """Add new TODO in relative to cursor position AddTodoCommand"""
+    def run(self, edit):
+        # Detect what caracters used for comments in this "scope"
+        view = self.view
+        get_comment_prefixes(view, view.sel())
+
+        # Detect position of new TODO (end of line, new line, multiple line endings)
+
+        # Compose TODO content - some sort of snippet or even use snippet to do this
+
+        # Add TODO and set focus to its start
+        return
+    def is_visible(self):
+        if self.view.is_read_only():
+            return False
+        # Detect what caracters used for comments in this "scope"
+        return True
+    def description(args):
+        return "Add new TODO"
