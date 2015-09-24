@@ -193,12 +193,12 @@ class AddTodoCommand(sublime_plugin.TextCommand):
         sel = view.sel()
         sel.clear()
         for region_prefix in region_prefix_set:
-            if view.classify(region_prefix[0].end()) & (CLASS_LINE_END | CLASS_EMPTY_LINE):
+            if view.classify(region_prefix[0].end()) & (sublime.CLASS_LINE_END | sublime.CLASS_EMPTY_LINE):
                 sel.add(region_prefix[0].end())
-                view.insert(edit, region_prefix[0].end(), region_prefix[1][0] + " " + snippet)
+                view.insert(edit, region_prefix[0].end(), region_prefix[1][0] + snippet)
             else:
                 sel.add(view.line(region_prefix[0].end()).end())
-                view.insert(edit, view.line(region_prefix[0].end()).end(), " " + region_prefix[1][0] + " " + snippet)
+                view.insert(edit, view.line(region_prefix[0].end()).end(), " " + region_prefix[1][0] + snippet)
 
         return
     def is_visible(self):
