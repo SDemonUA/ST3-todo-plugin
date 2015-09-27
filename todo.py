@@ -188,17 +188,25 @@ class AddTodoCommand(sublime_plugin.TextCommand):
                 region_prefix_set.append([region, prefixes])
 
         # Compose TODO content - some sort of snippet or even use snippet to do this
-        snippet = "TODO: text? [by ME]" # TODO change this
+        snippet = "${1:TODO}: ${2:...} [${3:$TM_FULLNAME}]" # TODO change this
+        snippet = sublime.expand_variables(snippet, view.window().extract_variables())
+
+        # TODO: add only 1 todo per line
 
         sel = view.sel()
         sel.clear()
+        add = 0 # Compensate region move after inserting text
         for region_prefix in region_prefix_set:
-            if view.classify(region_prefix[0].end()) & (sublime.CLASS_LINE_END | sublime.CLASS_EMPTY_LINE):
-                sel.add(region_prefix[0].end())
-                view.insert(edit, region_prefix[0].end(), region_prefix[1][0] + snippet)
+            point_class = view.classify(region_prefix[0].end())
+            if point_class & sublime.CLASS_EMPTY_LINE:
+                spacer = ""
             else:
-                sel.add(view.line(region_prefix[0].end()).end())
-                view.insert(edit, view.line(region_prefix[0].end()).end(), " " + region_prefix[1][0] + snippet)
+                spacer = " "
+
+            insert_point = view.line(region_prefix[0].end() + add).end()
+
+            add += view.insert(edit, insert_point, spacer + region_prefix[1][0] + snippet)
+            sel.add(insert_point + len(region_prefix[1][0]) + len(spacer))
 
         return
     def is_visible(self):
